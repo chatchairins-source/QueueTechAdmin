@@ -519,6 +519,22 @@ html, body {
 .qt-order-parties{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:13px}.qt-order-summary{margin-top:7px;color:#475569;font-size:13px}
 .qt-order-progress{margin-top:12px;padding:12px;background:#f8fafc;border-radius:14px}.qt-order-progress-title{font-weight:800;font-size:13px;margin-bottom:8px}.qt-order-progress-list{display:grid;gap:6px}.qt-order-step{display:flex;gap:9px;align-items:center;min-height:34px;opacity:.45}.qt-order-step.done,.qt-order-step.active{opacity:1}.qt-order-step-icon{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#e2e8f0;font-size:13px;flex:none}.qt-order-step.done .qt-order-step-icon{background:#dcfce7;color:#15803d}.qt-order-step.active .qt-order-step-icon{background:var(--primary,#2563eb);color:#fff}.qt-order-step-text{display:flex;gap:7px;align-items:center;flex-wrap:wrap;font-size:12px}.qt-order-step-text small{color:#94a3b8}.qt-order-now{font-size:10px;padding:2px 6px;border-radius:999px;background:#dbeafe;color:#1d4ed8}.qt-order-cancelled{margin-top:8px;padding:9px;border-radius:10px;background:#fee2e2;color:#b91c1c;font-size:12px}.qt-order-card-actions{margin-top:10px}.qt-order-card-actions .btn-block{margin-top:6px}
 </style>
+<style id="qt-route-card-css">
+.qt-route-card{background:linear-gradient(160deg,#eff6ff,#fff);border:1px solid #bfdbfe;border-radius:18px;padding:14px;margin:12px 0;box-shadow:0 6px 18px rgba(37,99,235,.10);text-align:left}
+.qt-route-head{display:flex;justify-content:space-between;align-items:center;font-weight:800;color:#1e3a8a;margin-bottom:10px}
+.qt-route-head b{background:#1d4ed8;color:#fff;border-radius:999px;padding:5px 12px;font-size:14px}
+.qt-route-steps{position:relative;padding-left:4px}
+.qt-route-step{display:flex;gap:10px;align-items:flex-start}
+.qt-route-step i{font-style:normal;width:34px;height:34px;flex:0 0 34px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:17px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.qt-route-step b{display:block;font-size:14px;color:#0f172a;line-height:1.3}
+.qt-route-step small{display:block;color:#64748b;font-size:12px;line-height:1.35;word-break:break-word}
+.qt-route-line{margin-left:16px;border-left:3px dotted #93c5fd;min-height:22px;padding:2px 0 2px 14px;display:flex;align-items:center}
+.qt-route-line span{font-size:12px;font-weight:700;color:#1d4ed8;background:#dbeafe;border-radius:999px;padding:2px 9px}
+.qt-route-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.qt-route-chips span{background:#fff;border:1px solid #bfdbfe;border-radius:999px;padding:6px 11px;font-size:13px;font-weight:700;color:#1e40af}
+.qt-route-note{margin-top:8px;font-size:11px;color:#94a3b8}
+.qt-rider-job-card .qt-route-card{margin:10px 0 14px}
+</style>
 </head>
 <body>
 
@@ -1075,7 +1091,7 @@ function qtOrderToRow(o){
 `+(o.note||'')).trim()||null,created_at:qtIso(o.createdAt),updated_at:qtIso(Date.now())};
 }
 function qtOrderFromRow(r){
-  return {id:r.id,orderNumber:r.order_number,customerId:r.customer_id,shopProfileId:r.shop_id,technicianProfileId:r.technician_id,riderProfileId:r.rider_id,status:qtOrderStatusFromDb(r.status,r.note),orderType:r.order_type,subtotal:Number(r.subtotal||0),deliveryFee:Number(r.delivery_fee||0),total:Number(r.total_amount||0),pickupAddress:r.pickup_address||'',pickupLat:r.pickup_latitude,pickupLng:r.pickup_longitude,deliveryAddress:r.delivery_address||'',deliveryLat:r.delivery_latitude,deliveryLng:r.delivery_longitude,note:r.note||'',createdAt:new Date(r.created_at).getTime(),updatedAt:new Date(r.updated_at||r.created_at).getTime(),items:[]};
+  return {gpRate:(r.gp_rate==null?undefined:Number(r.gp_rate)),gpAmount:(r.gp_amount==null?undefined:Number(r.gp_amount)),id:r.id,orderNumber:r.order_number,customerId:r.customer_id,shopProfileId:r.shop_id,technicianProfileId:r.technician_id,riderProfileId:r.rider_id,status:qtOrderStatusFromDb(r.status,r.note),orderType:r.order_type,subtotal:Number(r.subtotal||0),deliveryFee:Number(r.delivery_fee||0),total:Number(r.total_amount||0),pickupAddress:r.pickup_address||'',pickupLat:r.pickup_latitude,pickupLng:r.pickup_longitude,deliveryAddress:r.delivery_address||'',deliveryLat:r.delivery_latitude,deliveryLng:r.delivery_longitude,note:r.note||'',createdAt:new Date(r.created_at).getTime(),updatedAt:new Date(r.updated_at||r.created_at).getTime(),items:[]};
 }
 function qtTechJobToRow(j){
   const note='__QT_TECH_STATUS__='+j.status+'\n'+(j.description||'');
@@ -1169,9 +1185,9 @@ async function qtPersistKeyRaw(key,val){
 async function qtDeleteRows(table,filter){ const token=await qtGetAccessToken(); if(!token) throw new Error('ยังไม่ได้เข้าสู่ระบบ'); return qtSupabaseTable(table+'?'+filter,{method:'DELETE',accessToken:token}); }
 async function qtDeleteOrderFromDatabase(orderId){
   if(!qtUuidLike(orderId))return;
-  for(const [t,f] of [['order_items','order_id'],['quotations','order_id'],['deliveries','order_id'],['payments','order_id'],['complaints','order_id']]) await qtDeleteRows(t,f+'=eq.'+encodeURIComponent(orderId));
+  for(const [t,f] of [['order_items','order_id'],['quotations','order_id'],['deliveries','order_id'],['payments','order_id']]) await qtDeleteRows(t,f+'=eq.'+encodeURIComponent(orderId));
   /* child rows that may reference the order (ignore if the table/policy does not allow it) */
-  for(const t of ['order_chat_messages','order_audit']){ try{ await qtDeleteRows(t,'order_id=eq.'+encodeURIComponent(orderId)); }catch(e){ console.warn('cleanup',t,e); } }
+  for(const t of ['order_chat_messages','order_audit','complaints']){ try{ await qtDeleteRows(t,'order_id=eq.'+encodeURIComponent(orderId)); }catch(e){ console.warn('cleanup',t,e); } }
   await qtDeleteRows('orders','id=eq.'+encodeURIComponent(orderId));
 }
 async function qtDeleteUserFromDatabase(user){ if(!user||!qtUuidLike(user.id))return; if(user.type==='admin') throw new Error('ไม่สามารถลบบัญชี Admin ได้'); await qtSupabaseRpc('admin_delete_user',{target_user_id:user.id}); }
@@ -1193,6 +1209,8 @@ async function qtBackgroundHydrate(opts){
   let ok=false;
   try{
     await qtHydrateDatabase(opts);
+    try{ if(typeof qtPullSystemSettings==='function') await qtPullSystemSettings(); }catch(e){ console.warn('system settings pull failed',e); }
+    try{ if(typeof qtPullGpRates==='function') await qtPullGpRates(); }catch(e){ console.warn('gp rates pull failed',e); }
     ok=true;
   }catch(err){
     console.error('Background hydrate failed:',err);
@@ -1402,7 +1420,7 @@ function logout(){
   try{ if('speechSynthesis' in window) window.speechSynthesis.cancel(); }catch(e){}
   try{ if(navigator.vibrate) navigator.vibrate(0); }catch(e){}
   toast('ออกจากระบบแล้ว');
-  navigate('home');
+  navigate('login');
 }
 
 /* ---------- Notification System ---------- */
@@ -1968,7 +1986,7 @@ function startRiderJobAlert(order){
   qtRiderJobAlertActive=true;
   qtRiderJobAlertOrderId=order.id;
   const info=document.getElementById('qtRiderJobInfo');
-  if(info) info.innerHTML=`<b>${escapeHtml(order.shopName||'ร้านค้า')}</b><br>มีงานใหม่ถูกจ่ายให้คุณ<br>ระยะจากจุดรับสินค้า ${Number(order.dispatchDistanceKm||0).toFixed(2)} กม.`;
+  if(info) info.innerHTML=`<b>${escapeHtml(order.shopName||'ร้านค้า')}</b><br>มีงานใหม่ถูกจ่ายให้คุณ${qtRouteCardHTML(order,user)}`;
   document.getElementById('qtRiderJobAlert')?.classList.add('show');
   try{sessionStorage.setItem('qt_rider_offer_'+order.id,JSON.stringify({active:true,at:Date.now()}));}catch(e){}
   qtStartNotificationVibration({
@@ -2150,10 +2168,15 @@ async function adminDeleteUser(id){
 }
 async function adminDeleteOrder(orderId){
   const admin=qtAdminOnly(); if(!admin)return; const orders=dbGet('qt_orders',[]); const o=orders.find(x=>x.id===orderId); if(!o){toast('ไม่พบออเดอร์');return;}
-  if(!['cancelled','completed'].includes(o.status)){toast('ลบได้เฉพาะออเดอร์ที่ยกเลิกหรือส่งสำเร็จแล้ว');return;}
-  if(!confirm(`ยืนยันลบออเดอร์ ${displayOrderNumber(o)} หรือไม่?`))return;
+  const deletable=['cancelled','completed','shop_accepted'];
+  if(!deletable.includes(o.status)){toast('ลบได้เฉพาะออเดอร์ที่ยกเลิก ส่งสำเร็จ หรือร้านรับออเดอร์แล้ว');return;}
+  const activeWarn=o.status==='shop_accepted'?'\n\n⚠️ ออเดอร์นี้ร้านรับแล้วและยังไม่จบ การลบจะหายถาวรและแจ้งลูกค้า/ร้านค้า':'';
+  if(!confirm(`ยืนยันลบออเดอร์ ${displayOrderNumber(o)} หรือไม่?${activeWarn}`))return;
   try{
     await qtDeleteOrderFromDatabase(orderId);
+    if(o.status==='shop_accepted'){
+      [o.customerId,o.shopId].filter(Boolean).forEach(id=>pushNotification(id,'🗑️ ออเดอร์ถูกลบโดย Admin',`เลขออเดอร์ ${displayOrderNumber(o)} ถูกลบออกจากระบบ`,'home'));
+    }
     QT_DB_CACHE.qt_orders=orders.filter(x=>x.id!==orderId);
     delete QT_DB_CACHE[chatKey(orderId)]; delete QT_DB_CACHE[chatKey(orderId)+'_deleteAt'];
     qtAudit('order_delete',{orderId,orderNumber:displayOrderNumber(o),status:o.status});
@@ -2300,6 +2323,12 @@ function qtRouteRender(){
   const [page, param] = hash.split('/');
   const user = currentUser();
 
+  /* Login-only entry: signed-out visitors can only see login / register pages */
+  if(!user && !['login','register','rider-register'].includes(page)){ navigate('login'); return; }
+  /* Non-customer roles have no customer home page: send them to their own landing page */
+  if(user && user.status==='suspended' && !['approval-pending','login'].includes(page)){ navigate('approval-pending'); return; }
+  if(user && page==='home' && user.type!=='customer'){ navigate(user.type==='admin'?'admin':'dashboard'); return; }
+
   /* V5.39 BATCH 1 — Rider registration/approval route guard.
      A pending/rejected/suspended rider must never be sent back to rider-setup.
      rider-setup is reserved for an approved rider's profile management.
@@ -2358,11 +2387,11 @@ function qtRouteRender(){
 
 /* ---------- Layout ---------- */
 function layout(title, content){
-  document.title = title + ' - QueueTech V5.30';
+  document.title = title + ' - QueueTech';
   const user = currentUser();
   document.getElementById('app').innerHTML = `
     <header class="qt-header">
-      <div class="qt-logo" onclick="navigate('home')">🧭 QueueTech</div>
+      <div class="qt-logo" onclick="navigate(user?(user.type==='customer'?'home':(user.type==='admin'?'admin':'dashboard')):'login')">🧭 QueueTech</div>
       ${user
         ? `<div style="display:flex;align-items:center;gap:6px;"><div class="qt-user-chip" onclick="navigate('dashboard')">👤 ${escapeHtml(user.name)} (${roleLabel(user.type)})</div><button type="button" class="btn-danger" style="min-height:38px;padding:7px 10px;font-size:12px;" onclick="logout();return false;">ออกจากระบบ</button></div>`
         : `<div class="qt-auth-links"><a href="#login">เข้าสู่ระบบ</a> | <a href="#register">สมัครสมาชิก</a></div>`}
@@ -2376,20 +2405,12 @@ function bottomNav(){
   const user = currentUser();
   const hash = location.hash || '#home';
   const isActive = h => hash===('#'+h) ? 'active' : '';
-  if(!user){
-    return `<nav class="qt-bottomnav">
-      <a href="#home" class="${isActive('home')}">🏠<span>หน้าแรก</span></a>
-      <a href="#search" class="${isActive('search')}">🔎<span>ค้นหา</span></a>
-      <a href="#emergency" class="${isActive('emergency')}">🚨<span>ด่วนพิเศษ</span></a>
-      <a href="#login" class="${isActive('login')}">👤<span>เข้าสู่ระบบ</span></a>
-    </nav>`;
-  }
+  if(!user) return '';
   const badge = unreadNotifCount(user.id);
   const bnBadge = notificationBadgeHTML(user.id);
   if(user.type==='admin') return `<nav class="qt-bottomnav">
       <a href="#admin" class="${isActive('admin')}">🛡️<span>แอดมิน</span></a>
       <a href="#notifications" class="${isActive('notifications')}">🔔${bnBadge}<span>แจ้งเตือน</span></a>
-      <a href="#home" class="${isActive('home')}">🏠<span>หน้าแรก</span></a>
     </nav>`;
   if(user.type==='customer'){
     /* V5.33: same navigation whether or not an order is active (no more lock) */
@@ -2414,13 +2435,11 @@ function bottomNav(){
       <a href="#dashboard" class="${isActive('dashboard')}">👤<span>แดชบอร์ด</span></a>
       <a href="#rider-jobs" class="${isActive('rider-jobs')}">🛵<span>งานจัดส่ง</span></a>
       <a href="#notifications" class="${isActive('notifications')}">🔔${bnBadge}<span>แจ้งเตือน</span></a>
-      <a href="#home" class="${isActive('home')}">🏠<span>หน้าแรก</span></a>
     </nav>`;
   if(user.type==='technician') return `<nav class="qt-bottomnav">
       <a href="#dashboard" class="${isActive('dashboard')}">👤<span>แดชบอร์ด</span></a>
       <a href="#technician-jobs" class="${isActive('technician-jobs')}">🧰<span>งานซ่อม</span></a>
       <a href="#notifications" class="${isActive('notifications')}">🔔${bnBadge}<span>แจ้งเตือน</span></a>
-      <a href="#home" class="${isActive('home')}">🏠<span>หน้าแรก</span></a>
     </nav>`;
 }
 
@@ -2859,7 +2878,7 @@ async function handleLogin(e){
     /* V5.33: the critical path ends here (Auth + own profile). Orders/shops/products/chat/etc. load in the background after the page is shown. */
     const kickHydrate=()=>{ setTimeout(()=>{ qtBackgroundHydrate({light:false}); },0); };
     if(user.type!=='customer' && user.type!=='admin' && user.status!=='approved'){ toast('บัญชีนี้ยังรอแอดมินอนุมัติ'); navigate('approval-pending'); kickHydrate(); return false; }
-    toast('เข้าสู่ระบบสำเร็จ'); navigate('home');
+    toast('เข้าสู่ระบบสำเร็จ'); navigate(user.type==='admin'?'admin':(user.type==='customer'?'home':'dashboard'));
     kickHydrate();
   }catch(err){
     console.error('login failed',err);
@@ -3648,7 +3667,7 @@ async function confirmOrder(){
   const address=addressEl?addressEl.value.trim():'';
   const subtotal=cart.items.reduce((s,i)=>s+Number(i.price||0)*Number(i.qty||0),0);
   const deliveryFee=computeDeliveryFee(distanceKm(shop.lat,shop.lng,loc.lat,loc.lng));
-  const gp=gpAmount(subtotal),total=subtotal+deliveryFee;
+  const gp=gpAmount(subtotal,shop.id),total=subtotal+deliveryFee;
   const order={
     id:uid(),orderNumber: qtGenerateOrderNumber(),orderDate:qtLocalDateKey(),
     customerId:user.id,customerName:user.name,customerPhone:user.phone,
@@ -3841,7 +3860,7 @@ function renderOrderDetail(id){
         <div class="timeline-step ${statusIndex(order.status)>=i && order.status!=='cancelled' ?'done':''} ${order.status===s.key?'current':''}">${s.icon} ${s.label}</div>`).join('')}
     </div>
     ${order.status==='cancelled' ? '<div class="badge badge-red">❌ คำสั่งซื้อถูกยกเลิก</div>' : ''}
-    <div id="action-buttons">${orderActionButtons(order,user)}</div>
+    ${(user&&user.type==='rider'&&!['completed','cancelled'].includes(order.status))?qtRouteCardHTML(order,user):''}<div id="action-buttons">${orderActionButtons(order,user)}</div>
     ${(user && (user.type==='rider' || user.type==='admin')) && order.status==='waiting_rider' ? `
       <div class="card" style="margin-top:12px">
         <b>⚙️ Auto Dispatch</b>
@@ -3897,7 +3916,7 @@ function orderActionButtons(order, user){
   if(user.type==='admin'){
     if(order.status!=='cancelled' && order.status!=='completed') btns.push(`<button class="btn-block" style="background:var(--danger);color:#fff;border:none;padding:12px;border-radius:10px;cursor:pointer;" onclick="adminCancelOrder('${order.id}')">❌ ยกเลิกออเดอร์โดย Admin</button>`);
     if(order.status==='waiting_rider' && !order.riderId) btns.push(`<button class="btn-block" style="background:#6b46c1;color:#fff;border:none;padding:12px;border-radius:10px;cursor:pointer;" onclick="adminRedispatchOrder('${order.id}')">⚙️ จ่ายงานไรเดอร์ใหม่</button>`);
-    if(['cancelled','completed'].includes(order.status)) btns.push(`<button class="btn-block" style="background:#475569;color:#fff;border:none;padding:12px;border-radius:10px;cursor:pointer;" onclick="adminDeleteOrder('${order.id}')">🗑️ ลบออเดอร์</button>`);
+    if(['cancelled','completed','shop_accepted'].includes(order.status)) btns.push(`<button class="btn-block" style="background:#475569;color:#fff;border:none;padding:12px;border-radius:10px;cursor:pointer;" onclick="adminDeleteOrder('${order.id}')">🗑️ ลบออเดอร์</button>`);
   }
   return btns.join('') || '<p>รอการดำเนินการ...</p>';
 }
@@ -4478,6 +4497,39 @@ function expireDispatchOffers(){
 
 setInterval(expireDispatchOffers, 5000);
 
+
+/* ---- Rider route/distance ---- */
+function calculateDistance(lat1,lon1,lat2,lon2){ return distanceKm(lat1,lon1,lat2,lon2); } /* was missing: auto-dispatch called it and crashed */
+function qtKmText(k){ if(k==null||!Number.isFinite(k)) return '-'; return k<1?(Math.round(k*100)*10)+' ม.':k.toFixed(1)+' กม.'; }
+function qtRouteInfo(order,rider){
+  const n=v=>Number(v), ok=(a,b)=>Number.isFinite(a)&&Number.isFinite(b)&&(a!==0||b!==0);
+  const p=(order&&order.pickup)||{}, d=(order&&order.delivery)||{};
+  const pl=n(p.lat),pg=n(p.lng),dl=n(d.lat),dg=n(d.lng);
+  const hasP=ok(pl,pg), hasD=ok(dl,dg);
+  let toShop=null;
+  if(rider&&hasP&&ok(n(rider.lat),n(rider.lng))) toShop=distanceKm(n(rider.lat),n(rider.lng),pl,pg);
+  else if(order&&Number(order.dispatchDistanceKm)>0) toShop=Number(order.dispatchDistanceKm);
+  const shopToCust=(hasP&&hasD)?distanceKm(pl,pg,dl,dg):null;
+  const total=(toShop==null&&shopToCust==null)?null:(toShop||0)+(shopToCust||0);
+  const eta=total==null?null:Math.max(5,Math.round(total/25*60)+5); /* ~25 km/h average + 5 min handling */
+  return {toShop,shopToCust,total,eta,fee:Number((order&&order.deliveryFee)||0)};
+}
+function qtRouteCardHTML(order,rider){
+  if(!order) return '';
+  const r=qtRouteInfo(order,rider); const km=qtKmText;
+  return `<div class="qt-route-card">
+    <div class="qt-route-head"><span>🧭 เส้นทางงานนี้</span><b>${r.total!=null?km(r.total):'-'}</b></div>
+    <div class="qt-route-steps">
+      <div class="qt-route-step"><i>🛵</i><div><b>ตำแหน่งของคุณ</b><small>${r.toShop!=null?'ไปร้าน '+km(r.toShop):'ยังไม่ทราบตำแหน่งของคุณ'}</small></div></div>
+      <div class="qt-route-line"></div>
+      <div class="qt-route-step"><i>🏪</i><div><b>${escapeHtml(order.shopName||'ร้านค้า')}</b><small>${escapeHtml((order.pickup&&order.pickup.address)||'-')}</small></div></div>
+      <div class="qt-route-line">${r.shopToCust!=null?'<span>'+km(r.shopToCust)+'</span>':''}</div>
+      <div class="qt-route-step"><i>🏠</i><div><b>${escapeHtml(order.customerName||'ลูกค้า')}</b><small>${escapeHtml((order.delivery&&order.delivery.address)||'-')}</small></div></div>
+    </div>
+    <div class="qt-route-chips"><span>⏱️ ประมาณ ${r.eta!=null?r.eta+' นาที':'-'}</span><span>💵 ค่าส่ง ${r.fee} บาท</span></div>
+    <div class="qt-route-note">ระยะทางประมาณแบบเส้นตรง เส้นทางจริงอาจไกลกว่าเล็กน้อย</div>
+  </div>`;
+}
 function renderRiderJobs(){
   const user = currentUser(); if(!user||user.type!=='rider'){ navigate('login'); return; }
   const orders = dbGet('qt_orders',[]);
@@ -4490,10 +4542,10 @@ function renderRiderJobs(){
 
   layout('งานจัดส่ง', `
     <h2>🛵 งานที่ระบบจ่ายให้ฉัน</h2>
-    ${offered.length ? offered.map(o=>orderListCard(o)).join('') :
+    ${offered.length ? offered.map(o=>qtRouteCardHTML(o,user)+orderListCard(o)).join('') :
       '<p>ขณะนี้ยังไม่มีงานที่ระบบจ่ายให้คุณ</p>'}
     <h2>📋 งานของฉัน</h2>
-    ${active.length ? active.map(o=>orderListCard(o)).join('') :
+    ${active.length ? active.map(o=>(['completed','cancelled'].includes(o.status)?'':qtRouteCardHTML(o,user))+orderListCard(o)).join('') :
       '<p>ยังไม่มีงานที่รับ</p>'}
   `);
 }
@@ -5202,22 +5254,31 @@ function computeDeliveryFee(km){
 }
 
 /* ---------- 13/14. GP 10% + สูตรตั้งราคาขาย ---------- */
-const QT_GP_RATE = 0.10; // ควบคุมจากระบบ/Admin เท่านั้น ร้านค้าแก้เองไม่ได้
-function gpAmount(saleAmount){ return Math.round(saleAmount*QT_GP_RATE*100)/100; }
+const QT_GP_RATE = 0.10; // ค่ามาตรฐานสำรอง — อัตราจริงมาจากฐานข้อมูล (มาตรฐาน + อัตราพิเศษรายร้านที่ Admin ตั้ง)
+window.QT_GP_RATES = window.QT_GP_RATES || {};       // { shopUserId: {rate, promoUntil, note} }
+window.QT_GP_DEFAULT_RATE = window.QT_GP_DEFAULT_RATE ?? 10;
+function qtGpRatePercent(shopId){
+  const r=(window.QT_GP_RATES||{})[shopId];
+  if(r && Number.isFinite(r.rate) && (!r.promoUntil || r.promoUntil>=qtLocalDateKey())) return r.rate;
+  const d=Number(window.QT_GP_DEFAULT_RATE); return Number.isFinite(d)?d:QT_GP_RATE*100;
+}
+function gpAmount(saleAmount, shopId){ return Math.round((Number(saleAmount)||0)*qtGpRatePercent(shopId))/100; }
 function computeSellingPrice(cost, desiredProfit){
   const netWanted = (Number(cost)||0) + (Number(desiredProfit)||0);
-  return Math.ceil(netWanted / (1-QT_GP_RATE));
+  const u=(typeof currentUser==='function')?currentUser():null;
+  const rate=Math.min(0.95,qtGpRatePercent(u&&u.type==='shop'?u.id:null)/100);
+  return Math.ceil(netWanted / (1-rate));
 }
 function qtCalcSellingPrice(){
   const cost = parseFloat(document.getElementById('p-cost').value)||0;
   const profit = parseFloat(document.getElementById('p-profit').value)||0;
   if(!cost && !profit){ toast('กรอกต้นทุนหรือกำไรที่ต้องการก่อน'); return; }
   const sellPrice = computeSellingPrice(cost, profit);
-  const gp = gpAmount(sellPrice);
+  const _u=currentUser(); const gp = gpAmount(sellPrice,_u&&_u.type==='shop'?_u.id:null);
   const netReceived = sellPrice - gp;
   document.getElementById('p-price').value = sellPrice;
   document.getElementById('p-gp-preview').innerHTML =
-    `ราคาขายที่แนะนำ: <b>${sellPrice} บาท</b><br>หัก GP 10% (${gp.toFixed(2)} บาท) → ร้านได้รับประมาณ <b>${netReceived.toFixed(2)} บาท</b>`;
+    `ราคาขายที่แนะนำ: <b>${sellPrice} บาท</b><br>หัก GP ${qtGpRatePercent(_u&&_u.type==='shop'?_u.id:null)}% (${gp.toFixed(2)} บาท) → ร้านได้รับประมาณ <b>${netReceived.toFixed(2)} บาท</b>`;
 }
 
 /* ---------- 7. Slide to Confirm (ใช้แทนปุ่มยืนยันสำหรับการกระทำสำคัญ) ---------- */
@@ -5283,7 +5344,7 @@ function computeDailySettlement(shopId, dateKey){
     const sub = (typeof o.subtotal==='number') ? o.subtotal : o.total; // orders created before V5.31 have no subtotal field
     if(o.status==='cancelled'){ cancelledTotal += sub; return; } // ยกเลิก -> ไม่คิด GP
     grossSales += sub;
-    gp += (typeof o.gpAmount==='number') ? o.gpAmount : gpAmount(sub);
+    gp += (typeof o.gpAmount==='number') ? o.gpAmount : gpAmount(sub,shopId);
   });
   const netSales = grossSales; // ยอดขายสุทธิ = ยอดขายที่ไม่ถูกยกเลิก (คืนเงินบางส่วนยังไม่รองรับข้อมูลในต้นฉบับ V5.30)
   return { dateKey, grossSales: grossSales+cancelledTotal, cancelledTotal, netSales, gp, amountDue: gp };
@@ -5332,7 +5393,7 @@ function renderShopSettlement(){
   if(!dates.includes(today)) dates.unshift(today);
   layout('สรุปยอด/ชำระ GP', `
     <h2>💰 สรุปยอดขายรายวัน</h2>
-    <p style="font-size:12px;color:#6b7280;">คิด GP 10% จากยอดขายสุทธิ (ไม่รวมออเดอร์ที่ยกเลิก) — ร้านค้าไม่สามารถแก้ยอด GP เองได้</p>
+    <p style="font-size:12px;color:#6b7280;">คิด GP ${qtGpRatePercent(user.id)}% จากยอดขายสุทธิ (ไม่รวมออเดอร์ที่ยกเลิก) — ร้านค้าไม่สามารถแก้ยอด GP เองได้</p>
     ${dates.map(d=>{
       const s = computeDailySettlement(user.id, d);
       const rec = getSettlementRecord(user.id, d);
@@ -5342,20 +5403,112 @@ function renderShopSettlement(){
         ยอดขายรวม: ${s.grossSales.toFixed(2)} บาท<br>
         ยอดยกเลิก: ${s.cancelledTotal.toFixed(2)} บาท<br>
         ยอดขายสุทธิ: ${s.netSales.toFixed(2)} บาท<br>
-        GP 10%: <b>${s.gp.toFixed(2)} บาท</b><br>
+        GP: <b>${s.gp.toFixed(2)} บาท</b><br>
         สถานะการชำระ: <span class="badge ${status==='paid'?'badge-green':'badge-yellow'}">${GP_SETTLEMENT_STATUSES[status]}</span>
         ${status==='pending_payment' && s.gp>0 ? `<button class="btn-primary btn-block" onclick="shopReportGpPayment('${d}')">แจ้งโอนแล้ว</button>` : ''}
       </div>`;
     }).join('') || '<p>ยังไม่มีข้อมูลยอดขาย</p>'}
   `);
 }
+/* ---- Admin GP summary: daily view + whole-month view ---- */
+window.__qtGpMode=window.__qtGpMode||'day';
+function qtGpMonthKey(){ return window.__qtGpMonth||qtLocalDateKey().slice(0,7); }
+function qtGpSetMode(m){ window.__qtGpMode=m; renderAdminGpSettlement(); }
+function qtGpSetMonth(v){ if(/^\d{4}-\d{2}$/.test(String(v||''))){ window.__qtGpMonth=v; window.__qtGpMode='month'; renderAdminGpSettlement(); } }
+function qtGpShiftMonth(delta){ const [y,m]=qtGpMonthKey().split('-').map(Number); const d=new Date(y,m-1+delta,1); qtGpSetMonth(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')); }
+function qtGpFmt(n){ return Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function computeMonthlySettlement(shopId, monthKey){
+  const orders=dbGet('qt_orders',[]).filter(o=>o.shopId===shopId && String(o.orderDate||qtLocalDateKey(o.createdAt)).startsWith(monthKey));
+  const dates=[...new Set(orders.map(o=>o.orderDate||qtLocalDateKey(o.createdAt)))].sort();
+  const t={shopId,monthKey,days:dates.length,orders:orders.filter(o=>o.status!=='cancelled').length,cancelledOrders:orders.filter(o=>o.status==='cancelled').length,gross:0,cancelled:0,net:0,gp:0,paidGp:0,unpaidGp:0,daily:[]};
+  dates.forEach(d=>{
+    const s=computeDailySettlement(shopId,d); const rec=getSettlementRecord(shopId,d); const status=rec?rec.status:'pending_payment';
+    t.gross+=s.grossSales; t.cancelled+=s.cancelledTotal; t.net+=s.netSales; t.gp+=s.gp;
+    if(status==='paid') t.paidGp+=s.gp; else t.unpaidGp+=s.gp;
+    t.daily.push({dateKey:d,net:s.netSales,gp:s.gp,status});
+  });
+  return t;
+}
+function qtGpExportCsv(){
+  const admin=currentUser(); if(!admin||admin.type!=='admin') return;
+  const mk=qtGpMonthKey(); const rows=[['เดือน','ร้านค้า','วันที่','ยอดขายสุทธิ','GP','สถานะ']];
+  dbGet('qt_users',[]).filter(u=>u.type==='shop').forEach(sh=>{ computeMonthlySettlement(sh.id,mk).daily.forEach(d=>rows.push([mk,sh.shopName||sh.name||'',d.dateKey,d.net.toFixed(2),d.gp.toFixed(2),GP_SETTLEMENT_STATUSES[d.status]||d.status])); });
+  const csv='\ufeff'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download='gp-'+mk+'.csv'; document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* ---- GP rate management (Admin): default rate + special rate per shop ---- */
+window.qtPullGpRates=async function(){
+  const t=await qtGetAccessToken(); if(!t) return;
+  try{ const g=await qtSupabaseTable('system_settings?select=value&key=eq.gp&limit=1',{accessToken:t}); const d=Number(g&&g[0]&&g[0].value&&g[0].value.default_rate); if(Number.isFinite(d)) window.QT_GP_DEFAULT_RATE=d; }catch(e){}
+  try{ const rows=await qtSupabaseTable('shop_gp_rates?select=shop_user_id,rate_percent,promo_until,note',{accessToken:t}); const m={}; (rows||[]).forEach(r=>{ m[r.shop_user_id]={rate:Number(r.rate_percent),promoUntil:r.promo_until||null,note:r.note||''}; }); window.QT_GP_RATES=m; }catch(e){}
+};
+function qtGpNudge(shopId,delta){ const el=document.getElementById('gp-rate-'+shopId); if(!el) return; const v=Math.min(100,Math.max(0,(Number(el.value)||0)+delta)); el.value=Math.round(v*100)/100; }
+async function qtGpSaveRate(shopId){
+  const admin=qtAdminOnly(); if(!admin) return;
+  const rate=Number((document.getElementById('gp-rate-'+shopId)||{}).value);
+  const until=((document.getElementById('gp-until-'+shopId)||{}).value)||null;
+  if(!Number.isFinite(rate)||rate<0||rate>100){ toast('อัตรา GP ต้องอยู่ระหว่าง 0-100%'); return; }
+  if(until && until<qtLocalDateKey()){ toast('วันสิ้นสุดต้องไม่ใช่วันที่ผ่านมาแล้ว'); return; }
+  try{
+    const t=await qtGetAccessToken();
+    await qtSupabaseTable('shop_gp_rates?on_conflict=shop_user_id',{method:'POST',accessToken:t,body:{shop_user_id:shopId,rate_percent:rate,promo_until:until,updated_at:new Date().toISOString()}});
+    (window.QT_GP_RATES=window.QT_GP_RATES||{})[shopId]={rate,promoUntil:until,note:''};
+    try{ qtAudit('gp_rate_update',{entityType:'user',entityId:shopId,userId:shopId,rate,until}); }catch(e){}
+    try{ pushNotification(shopId,'💰 ปรับอัตรา GP ของร้านคุณ','อัตรา GP ใหม่ '+rate+'%'+(until?' ถึงวันที่ '+until:''),'shop-settlement'); }catch(e){}
+    toast('บันทึกอัตรา GP แล้ว (ใช้กับออเดอร์ใหม่)'); renderAdminGpSettlement();
+  }catch(e){ console.error(e); toast('บันทึกไม่สำเร็จ: '+String((e&&e.message)||e).slice(0,70)); }
+}
+async function qtGpResetRate(shopId){
+  const admin=qtAdminOnly(); if(!admin) return;
+  if(!confirm('ยกเลิกอัตราพิเศษของร้านนี้และกลับไปใช้อัตรามาตรฐาน?')) return;
+  try{
+    await qtDeleteRows('shop_gp_rates','shop_user_id=eq.'+encodeURIComponent(shopId));
+    if(window.QT_GP_RATES) delete window.QT_GP_RATES[shopId];
+    try{ qtAudit('gp_rate_reset',{entityType:'user',entityId:shopId,userId:shopId}); }catch(e){}
+    toast('กลับไปใช้อัตรามาตรฐานแล้ว'); renderAdminGpSettlement();
+  }catch(e){ console.error(e); toast('ไม่สำเร็จ: '+String((e&&e.message)||e).slice(0,70)); }
+}
+async function qtGpSaveDefault(){
+  const admin=qtAdminOnly(); if(!admin) return;
+  const rate=Number((document.getElementById('gp-default-rate')||{}).value);
+  if(!Number.isFinite(rate)||rate<0||rate>100){ toast('อัตรา GP ต้องอยู่ระหว่าง 0-100%'); return; }
+  try{
+    const t=await qtGetAccessToken();
+    await qtSupabaseTable('system_settings?on_conflict=key',{method:'POST',accessToken:t,body:{key:'gp',value:{default_rate:rate},updated_at:new Date().toISOString()}});
+    window.QT_GP_DEFAULT_RATE=rate;
+    try{ qtAudit('gp_default_update',{entityType:'system_settings',entityId:'gp',rate}); }catch(e){}
+    toast('บันทึกอัตรา GP มาตรฐานแล้ว'); renderAdminGpSettlement();
+  }catch(e){ console.error(e); toast('บันทึกไม่สำเร็จ: '+String((e&&e.message)||e).slice(0,70)); }
+}
+function qtGpRateCards(){
+  const shops=dbGet('qt_users',[]).filter(u=>u.type==='shop'); const def=Number(window.QT_GP_DEFAULT_RATE); const today=qtLocalDateKey();
+  const head=`<div class="order-detail-card"><b>อัตรา GP มาตรฐาน</b><div class="row-btns" style="margin-top:6px;align-items:center"><input id="gp-default-rate" type="number" min="0" max="100" step="0.5" value="${def}" style="flex:1;min-width:0"><span>%</span><button class="btn-primary" onclick="qtGpSaveDefault()">💾 บันทึก</button></div><small style="color:#64748b">ใช้กับร้านที่ไม่ได้ตั้งอัตราพิเศษ • เปลี่ยนแล้วมีผลกับออเดอร์ใหม่เท่านั้น ออเดอร์เก่าคงอัตราเดิม</small></div>`;
+  return head+(shops.map(sh=>{
+    const ov=(window.QT_GP_RATES||{})[sh.id]; const active=!!ov&&(!ov.promoUntil||ov.promoUntil>=today); const eff=active?ov.rate:def;
+    const tag=active?`<span class="badge badge-green">🎯 อัตราพิเศษ ${eff}%${ov.promoUntil?' ถึง '+ov.promoUntil:''}</span>`:(ov?`<span class="badge">โปรหมดอายุแล้ว (ใช้ ${def}%)</span>`:`<span class="badge">มาตรฐาน ${def}%</span>`);
+    return `<div class="order-detail-card"><b>${escapeHtml(sh.shopName||sh.name)}</b> ${tag}
+      <div class="row-btns" style="margin-top:8px;align-items:center"><button class="btn-secondary" onclick="qtGpNudge('${sh.id}',-1)">−1%</button><input id="gp-rate-${sh.id}" type="number" min="0" max="100" step="0.5" value="${eff}" style="flex:1;min-width:0"><span>%</span><button class="btn-secondary" onclick="qtGpNudge('${sh.id}',1)">+1%</button></div>
+      <label style="font-size:12px;color:#64748b">ใช้ถึงวันที่ (เว้นว่าง = ไม่มีวันสิ้นสุด)</label><input id="gp-until-${sh.id}" type="date" value="${ov&&ov.promoUntil?ov.promoUntil:''}">
+      <div class="row-btns" style="margin-top:6px"><button class="btn-primary" onclick="qtGpSaveRate('${sh.id}')">💾 บันทึกอัตราร้านนี้</button>${ov?`<button class="btn-secondary" onclick="qtGpResetRate('${sh.id}')">↩️ กลับค่ามาตรฐาน</button>`:''}</div></div>`;
+  }).join('')||'<p>ยังไม่มีร้านค้าในระบบ</p>');
+}
 function renderAdminGpSettlement(){
   const admin = currentUser(); if(!admin||admin.type!=='admin'){ navigate('login'); return; }
   const shops = dbGet('qt_users',[]).filter(u=>u.type==='shop');
-  const today = qtLocalDateKey();
-  layout('สรุปยอด GP ร้านค้า', `
-    <h2>💰 สรุปยอด GP ร้านค้าทั้งหมด (${today})</h2>
-    ${shops.map(sh=>{
+  const today = qtLocalDateKey(); const mode=window.__qtGpMode; const mk=qtGpMonthKey();
+  const tabs=`<div class="row-btns" style="margin:8px 0"><button class="${mode==='day'?'btn-primary':'btn-secondary'}" onclick="qtGpSetMode('day')">📅 วันนี้</button><button class="${mode==='month'?'btn-primary':'btn-secondary'}" onclick="qtGpSetMode('month')">🗓️ ทั้งเดือน</button><button class="${mode==='rate'?'btn-primary':'btn-secondary'}" onclick="qtGpSetMode('rate')">🎯 อัตรา GP</button></div>`;
+  let body='';
+  if(mode==='rate'){ body=qtGpRateCards(); }
+  else if(mode==='month'){
+    const rowsData=shops.map(sh=>({sh,m:computeMonthlySettlement(sh.id,mk)}));
+    const sum=rowsData.reduce((a,x)=>({net:a.net+x.m.net,gp:a.gp+x.m.gp,paid:a.paid+x.m.paidGp,unpaid:a.unpaid+x.m.unpaidGp,orders:a.orders+x.m.orders}),{net:0,gp:0,paid:0,unpaid:0,orders:0});
+    body=`<div class="row-btns" style="margin:8px 0;align-items:center"><button class="btn-secondary" onclick="qtGpShiftMonth(-1)">◀</button><input type="month" value="${mk}" onchange="qtGpSetMonth(this.value)" style="flex:1;min-width:0"><button class="btn-secondary" onclick="qtGpShiftMonth(1)">▶</button><button class="btn-secondary" onclick="qtGpSetMonth(qtLocalDateKey().slice(0,7))">เดือนนี้</button></div>
+      <div class="order-detail-card"><b>รวมทุกร้าน เดือน ${mk}</b><br>ออเดอร์ (ไม่รวมยกเลิก): ${sum.orders}<br>ยอดขายสุทธิ: ${qtGpFmt(sum.net)} บาท<br>GP รวม: <b>${qtGpFmt(sum.gp)} บาท</b><br>ชำระแล้ว: ${qtGpFmt(sum.paid)} บาท • ค้างชำระ: <b>${qtGpFmt(sum.unpaid)} บาท</b><button class="btn-secondary btn-block" style="margin-top:8px" onclick="qtGpExportCsv()">⬇️ ดาวน์โหลด CSV</button></div>`
+      + (rowsData.map(({sh,m})=>`<div class="order-detail-card"><b>${escapeHtml(sh.shopName||sh.name)}</b><br>ออเดอร์ ${m.orders} (ยกเลิก ${m.cancelledOrders}) • ยอดขายสุทธิ ${qtGpFmt(m.net)} บาท<br>GP: <b>${qtGpFmt(m.gp)} บาท</b> • ชำระแล้ว ${qtGpFmt(m.paidGp)} • ค้าง <b>${qtGpFmt(m.unpaidGp)}</b>
+        <details style="margin-top:6px"><summary>ดูรายวัน (${m.days} วัน)</summary>${m.daily.map(d=>`<div style="padding:6px 0;border-bottom:1px solid #eef2f7">${d.dateKey} • ขาย ${qtGpFmt(d.net)} • GP ${qtGpFmt(d.gp)} • <span class="badge ${d.status==='paid'?'badge-green':(d.status==='shop_reported'?'badge-yellow':'')}">${GP_SETTLEMENT_STATUSES[d.status]||d.status}</span>${d.status==='shop_reported'?` <button class="btn-primary" onclick="adminConfirmGpPayment('${sh.id}','${d.dateKey}')">✅ ยืนยันรับชำระ</button>`:''}</div>`).join('')||'<p>ไม่มีรายการในเดือนนี้</p>'}</details></div>`).join('')||'<p>ยังไม่มีร้านค้าในระบบ</p>');
+  } else {
+    body=shops.map(sh=>{
       const s = computeDailySettlement(sh.id, today);
       const rec = getSettlementRecord(sh.id, today);
       const status = rec ? rec.status : 'pending_payment';
@@ -5365,8 +5518,9 @@ function renderAdminGpSettlement(){
         สถานะ: <span class="badge ${status==='paid'?'badge-green':(status==='shop_reported'?'badge-yellow':'')}">${GP_SETTLEMENT_STATUSES[status]}</span>
         ${status==='shop_reported' ? `<button class="btn-primary btn-block" onclick="adminConfirmGpPayment('${sh.id}','${today}')">✅ ยืนยันรับชำระ</button>` : ''}
       </div>`;
-    }).join('') || '<p>ยังไม่มีร้านค้าในระบบ</p>'}
-  `);
+    }).join('') || '<p>ยังไม่มีร้านค้าในระบบ</p>';
+  }
+  layout('สรุปยอด GP ร้านค้า', `<h2>💰 สรุปยอด GP ร้านค้า${mode==='month'?' (รายเดือน)':(mode==='rate'?' (ตั้งอัตรา)':' ('+today+')')}</h2>${tabs}${body}`);
 }
 </script>
 <style id="qt-rider-fit-screen-fix">
@@ -5765,6 +5919,13 @@ body{margin:0;padding-left:0;padding-right:0}
     try{const raw=localStorage.getItem(SETTINGS_KEY); const v=raw?JSON.parse(raw):{}; return Object.assign({},DEFAULTS,v||{});}catch(e){return Object.assign({},DEFAULTS);}
   }
   window.qtGetSystemSettings=function(){return readSettings();};
+  /* pull the admin's settings from the database so every device uses the same fees */
+  window.qtPullSystemSettings=async function(){
+    const t=await qtGetAccessToken(); if(!t) return;
+    const rows=await qtSupabaseTable('system_settings?select=value&key=eq.app&limit=1',{accessToken:t});
+    const v=Array.isArray(rows)&&rows[0]&&rows[0].value;
+    if(v&&typeof v==='object'){ try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(v));}catch(e){} }
+  };
   window.qtSaveSystemSettings=function(){
     const admin=typeof qtAdminOnly==='function'?qtAdminOnly():null; if(!admin)return;
     const val=(id,fallback)=>{const el=document.getElementById(id); const n=Number(el?.value); return Number.isFinite(n)?n:fallback;};
@@ -5772,6 +5933,7 @@ body{margin:0;padding-left:0;padding-right:0}
     cfg.delivery5=Math.max(0,cfg.delivery5); cfg.delivery10=Math.max(cfg.delivery5,cfg.delivery10); cfg.riderRadius=Math.max(0,cfg.riderRadius); cfg.techRadius=Math.max(0,cfg.techRadius); cfg.orderTimeout=Math.max(1,cfg.orderTimeout); cfg.systemFee=Math.min(100,Math.max(0,cfg.systemFee));
     try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(cfg));}catch(e){toast('บันทึกการตั้งค่าไม่สำเร็จ');return;}
     try{dbSet('qt_system_settings',cfg);}catch(e){}
+    (async()=>{ try{ const t=await qtGetAccessToken(); await qtSupabaseTable('system_settings?on_conflict=key',{method:'POST',accessToken:t,body:{key:'app',value:cfg,updated_at:new Date().toISOString()}}); toast('☁️ ส่งการตั้งค่าขึ้นฐานข้อมูลแล้ว'); }catch(err){ console.error(err); toast('บันทึกในเครื่องนี้แล้ว แต่ส่งขึ้นฐานข้อมูลไม่สำเร็จ: '+String((err&&err.message)||err).slice(0,60)); } })();
     try{qtAudit('system_settings_update',{entityType:'system_settings',entityId:'system',settings:cfg});}catch(e){}
     toast('💾 บันทึกการตั้งค่าแล้ว');
   };
