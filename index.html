@@ -1525,6 +1525,7 @@ function qtHandleNewNotification(n){
 }
 
 function pushNotification(userId, title, body, link, type, referenceId){
+  if(!qtAdminSettings().notificationsEnabled) return null;
   let all = dbGet('qt_notifications',[]);
   const now=Date.now();
   const safeLink=link||undefined;
@@ -2232,11 +2233,11 @@ function adminApproveRefund(orderId){
   qtFinanceEntry('order_refund',{orderId,orderNumber:displayOrderNumber(o),customerId:o.customerId,shopId:o.shopId,amount,status:'approved',approvedBy:admin.id}); qtAudit('order_refund_approve',{orderId,amount});
   pushNotification(o.customerId,'💸 อนุมัติคืนเงินแล้ว','ออเดอร์ '+displayOrderNumber(o)+' จำนวน '+amount+' บาท','order/'+orderId); toast('อนุมัติคืนเงินแล้ว'); renderAdminGovernance();
 }
-function adminSecurityAction(type,id){
+function adminSecurityAction(type,id,providedReason){
   const admin=qtAdminOnly(); if(!admin)return;
   const users=dbGet('qt_users',[]); const u=users.find(x=>x.id===id); if(!u){toast('ไม่พบผู้ใช้');return;}
   if(u.type==='admin'){toast('ป้องกันบัญชี Admin จากการเปลี่ยนแปลงผ่านหน้านี้');return;}
-  if(type==='suspend'){u.status='suspended';u.suspendedBy=admin.id;u.suspendedAt=Date.now();u.suspendedReason=prompt('เหตุผลระงับบัญชี:')||'ตามการตรวจสอบของ Admin';u.available=false;u.online=false;}
+  if(type==='suspend'){u.status='suspended';u.suspendedBy=admin.id;u.suspendedAt=Date.now();u.suspendedReason=providedReason!==undefined ? (providedReason||'ตามการตรวจสอบของ Admin') : (prompt('เหตุผลระงับบัญชี:')||'ตามการตรวจสอบของ Admin');u.available=false;u.online=false;}
   if(type==='restore'){u.status='approved';u.approvedBy=admin.id;u.approvedAt=Date.now();u.unsuspendedBy=admin.id;u.unsuspendedAt=Date.now();u.suspendedReason=null;}
   dbSet('qt_users',users);qtAudit('user_'+type,{userId:id});pushNotification(id,type==='suspend'?'⛔ บัญชีถูกระงับ':'🔓 ปลดระงับบัญชีแล้ว','ดำเนินการโดย Admin','approval-pending');renderAdminGovernance();
 }
@@ -2278,6 +2279,75 @@ function adminLayout(title, content){
       </header>
       <main class="qt-admin-main">${content}</main>
     </div>`;
+}
+
+/* ---------- V5.54 ADMIN SECURITY / SETTINGS CORE ---------- */
+const QT_ADMIN_SETTINGS_KEY='qt_admin_system_settings_v554';
+const QT_ADMIN_SETTINGS_DEFAULTS={deliveryFee5Km:30,deliveryFee10Km:50,riderRadiusKm:1,technicianRadiusKm:10,orderTimeoutMin:1,systemFeePercent:0,notificationsEnabled:true};
+function qtAdminSettings(){
+  try{
+    const raw=localStorage.getItem(QT_ADMIN_SETTINGS_KEY);
+    const saved=raw?JSON.parse(raw):{};
+    return Object.assign({},QT_ADMIN_SETTINGS_DEFAULTS,saved||{});
+  }catch(e){return Object.assign({},QT_ADMIN_SETTINGS_DEFAULTS)}
+}
+function qtAdminSaveSettingsObject(next){
+  const clean=Object.assign({},QT_ADMIN_SETTINGS_DEFAULTS,next||{});
+  clean.deliveryFee5Km=Math.max(0,Number(clean.deliveryFee5Km)||0);
+  clean.deliveryFee10Km=Math.max(0,Number(clean.deliveryFee10Km)||0);
+  clean.riderRadiusKm=Math.max(0.1,Number(clean.riderRadiusKm)||QT_ADMIN_SETTINGS_DEFAULTS.riderRadiusKm);
+  clean.technicianRadiusKm=Math.max(0.1,Number(clean.technicianRadiusKm)||QT_ADMIN_SETTINGS_DEFAULTS.technicianRadiusKm);
+  clean.orderTimeoutMin=Math.max(1,Number(clean.orderTimeoutMin)||QT_ADMIN_SETTINGS_DEFAULTS.orderTimeoutMin);
+  clean.systemFeePercent=Math.max(0,Number(clean.systemFeePercent)||0);
+  clean.notificationsEnabled=clean.notificationsEnabled!==false;
+  localStorage.setItem(QT_ADMIN_SETTINGS_KEY,JSON.stringify(clean));
+  return clean;
+}
+function qtAdminSaveSystemSettings(){
+  const admin=qtAdminOnly(); if(!admin)return;
+  const n=id=>document.getElementById(id);
+  const settings=qtAdminSaveSettingsObject({
+    deliveryFee5Km:n('qt-setting-deliveryFee5Km')?.value,
+    deliveryFee10Km:n('qt-setting-deliveryFee10Km')?.value,
+    riderRadiusKm:n('qt-setting-riderRadiusKm')?.value,
+    technicianRadiusKm:n('qt-setting-technicianRadiusKm')?.value,
+    orderTimeoutMin:n('qt-setting-orderTimeoutMin')?.value,
+    systemFeePercent:n('qt-setting-systemFeePercent')?.value,
+    notificationsEnabled:!!n('qt-setting-notificationsEnabled')?.checked
+  });
+  qtAudit('settings_update',{entityType:'system_settings',entityId:null,settings});
+  toast('💾 บันทึก Settings แล้ว และมีผลกับ Prototype ทันที');
+  renderAdminGovernance();
+}
+function qtAdminRefreshAuditLog(){
+  const admin=qtAdminOnly(); if(!admin)return;
+  const list=document.getElementById('qt-admin-audit-list');
+  const audit=dbGet('qt_audit_log',[]).slice(-50).reverse();
+  if(list){list.innerHTML=audit.map(x=>`<div class="qt-admin-log"><b>${escapeHtml(x.action||'-')}</b> • ผู้ดำเนินการ: ${escapeHtml(x.actorRole||'-')} ${x.actorId?'('+escapeHtml(x.actorId)+')':''} • ประเภทข้อมูล: ${escapeHtml(x.entityType||'-')} • ID: ${escapeHtml(x.entityId||'-')} • ${x.at?new Date(x.at).toLocaleString('th-TH'):'-'}</div>`).join('')||'<div class="qt-audit-empty">ยังไม่มีบันทึก</div>';} 
+  else renderAdminGovernance();
+}
+function qtAdminSecurityTab(type){
+  document.querySelectorAll('.qt-sec-tab').forEach(b=>b.classList.toggle('active',b.dataset.type===type));
+  document.querySelectorAll('.qt-sec-panel').forEach(p=>p.classList.toggle('active',p.dataset.type===type));
+}
+function qtAdminViewUser(id){
+  const admin=qtAdminOnly(); if(!admin)return;
+  const u=dbGet('qt_users',[]).find(x=>String(x.id)===String(id));
+  if(!u){toast('ไม่พบผู้ใช้');return;}
+  const detail=`ชื่อ: ${u.name||'-'}\nประเภท: ${roleLabel(u.type)||u.type}\nID: ${u.id}\nโทร: ${u.phone||'-'}\nอีเมล: ${u.email||'-'}\nสถานะ: ${accountStatusLabel(u.status)||u.status}\nสร้างเมื่อ: ${u.createdAt?new Date(u.createdAt).toLocaleString('th-TH'):'-'}`;
+  alert(detail);
+}
+function qtAdminSecurityActionAndRefresh(action,id){
+  const admin=qtAdminOnly(); if(!admin)return;
+  const u=dbGet('qt_users',[]).find(x=>String(x.id)===String(id));
+  if(!u){toast('ไม่พบผู้ใช้');return;}
+  if(u.type==='admin' || String(u.id)===String(admin.id)){toast('🛡️ ไม่สามารถระงับหรือลบบัญชี Admin ได้');return;}
+  if(action==='suspend' && u.status==='suspended'){toast('บัญชีนี้ถูกระงับอยู่แล้ว');return;}
+  if(action==='restore' && u.status!=='suspended'){toast('บัญชีนี้ไม่ได้ถูกระงับ');return;}
+  const reason=action==='suspend'?prompt('เหตุผลระงับบัญชี:'):null;
+  if(action==='suspend' && reason===null)return;
+  adminSecurityAction(action,id,reason);
+  renderAdminGovernance();
 }
 
 function renderAdminGovernance(){
@@ -4495,8 +4565,8 @@ async function handleRiderSetup(e){
  6) If the assigned rider declines/times out, call dispatchNextRider().
 */
 const DISPATCH_CONFIG = {
-  maxRadiusKm: 1,
-  responseTimeoutMs: 60 * 1000
+  get maxRadiusKm(){ return Number(qtAdminSettings().riderRadiusKm)||1; },
+  get responseTimeoutMs(){ return (Number(qtAdminSettings().orderTimeoutMin)||1)*60*1000; }
 };
 
 function riderActiveJobCount(riderId){
@@ -4555,7 +4625,7 @@ function dispatchOrder(orderId){
     order.dispatchLastAt = Date.now();
     dbSet('qt_orders',orders);
     pushNotification(order.shopId, '⚠️ ยังหาไรเดอร์ไม่ได้',
-      'ยังไม่มีไรเดอร์ที่พร้อมรับงานในรัศมี 1 กม.', 'order/'+orderId);
+      'ยังไม่มีไรเดอร์ที่พร้อมรับงานในรัศมี '+DISPATCH_CONFIG.maxRadiusKm+' กม.', 'order/'+orderId);
     return null;
   }
 
@@ -5095,7 +5165,8 @@ function selectEmergencyType(type){
 function renderEmergencyResults(type, loc){
   window.__emergencyLoc = loc;
   const techs = dbGet('qt_users',[]).filter(u=>u.type==='technician' && u.emergencyMode && u.available && (u.emergencyServices||[]).includes(type));
-  const withDist = techs.map(t=>({...t, distance:distanceKm(loc.lat,loc.lng,t.lat,t.lng)})).sort((a,b)=>a.distance-b.distance);
+  const maxTechRadius=Number(qtAdminSettings().technicianRadiusKm)||10;
+  const withDist = techs.map(t=>({...t, distance:distanceKm(loc.lat,loc.lng,t.lat,t.lng)})).filter(t=>t.distance<=maxTechRadius).sort((a,b)=>a.distance-b.distance);
   document.getElementById('emergency-results').innerHTML = `
     <h3>ช่างที่พร้อมให้บริการ: ${serviceTypeLabel(type)}</h3>
     <div id="emergency-map" class="map-box"></div>
