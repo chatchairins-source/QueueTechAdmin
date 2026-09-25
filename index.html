@@ -6,7 +6,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>QueueTech V5.32 - Prototype</title>
+<title>QueueTech V5.32</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
@@ -807,7 +807,7 @@ window.QTOnline={
 
 <script id="v526-rider-online-status">
 /* QueueTech V5.30 — Rider online presence for Admin monitoring.
-   Prototype/session-only implementation: updates are visible across tabs
+   Session-only implementation: updates are visible across tabs
    on the same browser/profile. Real cross-device presence requires backend/WebSocket.
 */
 const QT_RIDER_PRESENCE_KEY = 'qt_rider_presence_v526';
@@ -931,14 +931,14 @@ setTimeout(qtRiderPresenceHeartbeat, 1000);
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 /* =========================================================================
-   QueueTech V5.51 — Functional Prototype (Single File)
+   QueueTech V5.51 — Single File Application
    Notification RLS resilience: notification sync failures are non-blocking.
    Based on V5.50 search-location build.
    ========================================================================= */
 /* =========================================================================
-   QueueTech V5.8 — Functional Prototype (Single File)
+   QueueTech V5.8 — Single File Application
    Vanilla JS + Supabase + Leaflet/OSM
-   ⚠️ Prototype เท่านั้น — ข้อมูลระบบบันทึกใน Supabase; Session ชั่วคราวเก็บใน sessionStorage
+   ⚠️ ระบบนี้ยังมีส่วนที่อยู่ระหว่างพัฒนา — ข้อมูลระบบบันทึกใน Supabase; Session ชั่วคราวเก็บใน sessionStorage
    ห้ามใช้ข้อมูลจริงหรือนำขึ้น Production โดยไม่ปรับปรุงระบบความปลอดภัยก่อน
    ========================================================================= */
 
@@ -1791,7 +1791,7 @@ function checkCustomerRiderArrivalAlert(){
   }
 }
 
-// Monitor LocalStorage changes so another tab/device in this prototype
+// Monitor LocalStorage changes so another tab/device in this application
 // can trigger the alert when the order status becomes "arrived".
 window.addEventListener('storage', (ev)=>{
   if(ev.key==='qt_orders') setTimeout(checkCustomerRiderArrivalAlert,50);
@@ -2114,7 +2114,7 @@ function shopPayPromotion(id){
   let promos=dbGet('qt_promotions',[]); const p=promos.find(x=>x.id===id);
   if(!p||p.shopId!==user.id){toast('ไม่พบรายการ');return;}
   if(p.status!=='approved'){toast('รายการต้องได้รับอนุมัติจาก Admin ก่อน');return;}
-  // Prototype payment confirmation only; real payment gateway must be server-side.
+  // Test payment confirmation only; real payment gateway must be server-side.
   p.paymentStatus='paid'; p.paymentId='DEMO-PAY-'+Date.now(); p.status='active'; p.activatedAt=Date.now();
   dbSet('qt_promotions',promos);
   qtFinanceEntry('promotion_charge',{promotionId:id,shopId:user.id,amount:p.bidPrice,paymentId:p.paymentId,status:'paid'});
@@ -2474,7 +2474,7 @@ function renderHomePromoteWidget(){
 function renderRegister(){
   layout('สมัครสมาชิก', `
     <h2>สมัครสมาชิก QueueTech</h2>
-    <p class="warn-text">⚠️ Prototype: รหัสผ่านจัดการโดย Supabase Auth — ระบบจะไม่เก็บรหัสผ่านจริงไว้ใน LocalStorage</p>
+    <p class="warn-text">⚠️ รหัสผ่านจัดการโดย Supabase Auth — ระบบจะไม่เก็บรหัสผ่านจริงไว้ใน LocalStorage</p>
     <div class="role-picker" aria-label="เลือกประเภทบัญชี">
       <button type="button" class="role-card active" onclick="switchRegisterTab('customer', this)"><span class="role-icon">👤</span><b>ลูกค้า</b><small>สั่งซื้อ / เรียกช่าง</small></button>
       <button type="button" class="role-card" onclick="switchRegisterTab('shop', this)"><span class="role-icon">🏪</span><b>ร้านค้า</b><small>ขายสินค้า / รับออเดอร์</small></button>
@@ -4067,7 +4067,7 @@ function adminRedispatchOrder(orderId){
   - The customer map must never invent a rider GPS position.
   - If a real last-known rider location exists, show it.
   - If no real location exists yet, show only pickup/delivery points.
-  This remains a prototype until cross-device Realtime/API is enabled.
+  This remains incomplete until cross-device Realtime/API is enabled.
 */
 function initTrackingMap(order){
   if(typeof L==='undefined' || !order || !order.pickup || !order.delivery ||
@@ -4737,7 +4737,7 @@ function techJobActionButtons(job, user){
   return btns.join('') || '<p>รอดำเนินการ...</p>';
 }
 /* V5.31: who is allowed to move a job from which status to which next status.
-   NOTE per spec §21 — this is a client-side prototype check only. In production this
+   NOTE per spec §21 — this is a client-side check only. In production this
    exact table must be re-verified on the Backend before writing any status change;
    the frontend must never be the only place that enforces this. */
 const TECH_JOB_TRANSITIONS = {
@@ -5121,7 +5121,7 @@ function renderShopModules(){
   const modules = user.modules || defaultModules();
   layout('แพ็กเกจและโมดูลของร้าน', `
     <h2>⚙️ แพ็กเกจและโมดูลของร้าน</h2>
-    <p class="warn-text">Prototype: ยังไม่มีการเรียกเก็บเงินจริง การเปิด/ปิดโมดูลเป็นเพียงการจำลอง</p>
+    <p class="warn-text">ยังไม่มีการเรียกเก็บเงินจริง การเปิด/ปิดโมดูลเป็นเพียงการจำลอง</p>
     ${modules.map(m=>`
       <div class="module-card">
         <div><b>${m.label}</b><br>
@@ -5667,7 +5667,7 @@ body{margin:0;padding-left:0;padding-right:0}
 
 <script id="qt-v548-batch8-rider-documents-hardening">
 /* QueueTech Batch 8 — Rider document validation and safer temporary storage.
-   Documents are still client-side in this HTML prototype. Production should
+   Documents are still client-side in this HTML application. Production should
    upload them to Supabase Storage and keep only storage paths in the profile. */
 (function(){
   const MAX_FILE_BYTES=8*1024*1024;
@@ -5807,7 +5807,7 @@ body{margin:0;padding-left:0;padding-right:0}
     };
   };
 
-  /* Clean up old prototype-only presence entries in the current browser session. */
+  /* Clean up old session-only presence entries in the current browser session. */
   setInterval(()=>{
     try{
       const all=qtGetRiderPresence(), now=Date.now(), changed=[];
