@@ -6,7 +6,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>QueueTech V5.32</title>
+<title>QueueTech V5.42</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
@@ -535,6 +535,32 @@ html, body {
 .qt-route-note{margin-top:8px;font-size:11px;color:#94a3b8}
 .qt-rider-job-card .qt-route-card{margin:10px 0 14px}
 </style>
+
+<style id="qt-v541-unified-app-theme">
+/* V5.41 — one visual system across every screen */
+:root{--qt-surface:#fff;--qt-soft:#f8fafc;--qt-line:#e2e8f0;--qt-text:#172033;--qt-muted:#64748b;--qt-blue:#2563eb;--qt-radius:18px}
+body{background:linear-gradient(180deg,#f7f9fc 0,#f4f7fb 100%);color:var(--qt-text)}
+.qt-main{width:100%;max-width:760px;margin:0 auto;padding-top:18px}
+.qt-appbar{min-height:62px;gap:10px}.qt-appbar-left,.qt-appbar-user{display:flex;align-items:center;gap:8px;min-width:0}.qt-appbar-left{flex:1}.qt-appbar-user{justify-content:flex-end}.qt-logo{white-space:nowrap}
+.qt-back-btn,.qt-logout-btn{width:38px;height:38px;flex:0 0 38px;border:1px solid var(--qt-line);border-radius:12px;background:#fff;color:#334155;font:800 26px/1 system-ui;display:grid;place-items:center;cursor:pointer}.qt-logout-btn{font-size:19px;color:#b91c1c;background:#fff7f7;border-color:#fecaca}
+.qt-auth-links{display:flex;gap:6px}.qt-auth-links a{margin:0!important;padding:7px 9px;border-radius:10px;background:#eff6ff}
+.qt-user-chip{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qt-main>h2,.qt-main>h1{margin-top:4px}.card,.module-card,.status-toggle,.stat-card,.order-card,.order-detail-card,.order-summary,.inline-form,.notif-panel,.shop-card,.product-card,.tech-card,.promo-card,.qt-admin-wrap,.rider-setup-card,.order-chat{border-radius:var(--qt-radius)!important;border-color:var(--qt-line)!important;box-shadow:0 7px 22px rgba(15,23,42,.05)!important}
+.btn-primary,.btn-secondary,.btn-danger,.row-btns button,.row-btns a{border-radius:12px!important;min-height:42px}.btn-primary{background:linear-gradient(135deg,#1d4ed8,#2563eb)!important}.btn-secondary{background:#f1f5f9!important;border:1px solid #e2e8f0!important}
+.hero{border-radius:22px!important;margin-top:0!important}.grid-menu{grid-template-columns:repeat(3,minmax(0,1fr))}.menu-card{border-radius:18px!important;min-width:0}
+.qt-bottomnav{max-width:760px;left:50%!important;right:auto!important;width:100%;transform:translateX(-50%);border-radius:18px 18px 0 0}.qt-bottomnav a{min-width:0}.qt-bottomnav a.active{background:#eff6ff;border-radius:12px}
+@media(max-width:520px){.qt-header{padding:10px 9px!important}.qt-main{padding:12px 10px 92px!important}.qt-logo{font-size:17px}.qt-user-chip{max-width:108px;padding:7px 8px}.qt-back-btn,.qt-logout-btn{width:36px;height:36px;flex-basis:36px}.grid-menu{gap:8px}.menu-card{min-height:96px!important;padding:12px 6px!important}.qt-bottomnav a{font-size:10px;padding-left:1px;padding-right:1px}}
+
+/* V5.42 Admin calm/unified UI */
+.qt-admin-wrap{max-width:1040px;margin:0 auto;background:transparent!important;border:0!important;box-shadow:none!important;padding:4px!important}
+.qt-admin-head{padding:8px 2px 14px;border-bottom:1px solid var(--qt-line);margin-bottom:12px}.qt-admin-head h2{font-size:21px;letter-spacing:-.3px;margin:0 0 4px}.qt-admin-note{font-size:12px;line-height:1.55;color:#64748b}
+.qt-admin-tabs{display:flex!important;overflow-x:auto!important;gap:7px!important;padding:2px 1px 10px!important;margin:8px 0 16px!important;border:0!important;scrollbar-width:none}.qt-admin-tabs::-webkit-scrollbar{display:none}.qt-admin-tab{flex:0 0 auto!important;width:auto!important;min-width:auto!important;border:1px solid #e5e7eb!important;background:#fff!important;color:#475569!important;border-radius:999px!important;padding:8px 12px!important;font-size:12px!important;line-height:1.2!important}.qt-admin-tab.active{background:#0f172a!important;color:#fff!important;border-color:#0f172a!important}
+.qt-admin-panel>h3{font-size:17px;margin:4px 0 12px}.qt-admin-panel>.card,.qt-admin-panel .card{padding:14px!important;margin:10px 0!important;background:#fff!important}.qt-admin-panel .row-btns{gap:8px}.qt-admin-panel .row-btns button{min-height:38px;border-radius:10px}
+.qt-admin-quick-status{gap:7px;margin:2px 0 14px}.qt-admin-quick-status span{font-size:11px;padding:7px 10px;background:#fff}.qt-admin-mobile-stats{gap:8px}.qt-admin-mobile-stat{padding:8px 11px;background:#fff!important}
+.qt-admin-worklist{border-radius:16px;box-shadow:0 6px 20px rgba(15,23,42,.04)}.qt-admin-workrow{padding:13px 12px;min-height:56px}.qt-admin-workicon{background:#f8fafc}.qt-admin-workbtn{background:#f8fafc;border:1px solid #e5e7eb;padding:7px 10px}
+.qt-admin-home-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}.qt-admin-home-actions button{border:1px solid #e5e7eb;background:#fff;border-radius:14px;padding:14px;text-align:left;cursor:pointer;box-shadow:0 5px 18px rgba(15,23,42,.035)}.qt-admin-home-actions span{display:block;font-weight:800;font-size:13px;color:#0f172a}.qt-admin-home-actions small{display:block;margin-top:4px;color:#94a3b8;font-size:10px;line-height:1.35}.qt-admin-logout{width:100%;border:0;background:transparent;color:#94a3b8;padding:10px;font-weight:700;cursor:pointer}
+@media(max-width:520px){.qt-admin-wrap{padding:0!important}.qt-admin-head{padding-top:4px}.qt-admin-head h2{font-size:19px}.qt-admin-home-actions{grid-template-columns:1fr 1fr;gap:8px}.qt-admin-home-actions button{padding:12px 10px}.qt-admin-panel .card{padding:12px!important}.qt-admin-workmain small{font-size:10px}.qt-admin-tabs{margin-left:-2px!important;margin-right:-2px!important}}
+</style>
 </head>
 <body>
 
@@ -1036,6 +1062,8 @@ function qtServiceStatusFromDb(s, row){
 }
 function qtUserToRow(u, includeStatus=true){
   const meta=qtUserMetadata(u);
+  /* V5.42: database now supports rejected as a first-class account status. */
+  delete meta.accountDecision;
   /* rider documents live in rider_profiles.metadata only (avoid storing every image twice) */
   if(u.type==='rider') QT_RIDER_IMAGE_FIELDS.forEach(k=>{ delete meta[k]; });
   const row={id:qtUuidLike(u.id)?u.id:undefined,auth_user_id:u.authUserId||null,role:u.type,name:u.name||'',phone:u.phone||'',
@@ -1043,6 +1071,7 @@ function qtUserToRow(u, includeStatus=true){
   /* the column is the source of truth: pending stays pending until an admin approves ('active') */
   if(includeStatus) row.status = u.status==='suspended' ? 'suspended'
     : u.status==='deleted' ? 'deleted'
+    : u.status==='rejected' ? 'rejected'
     : (u.type==='customer'||u.type==='admin'||u.status==='approved') ? 'active' : 'pending';
   return row;
 }
@@ -1061,6 +1090,7 @@ function qtUserFromRow(r){
   if(r.status==='suspended'||r.status==='deleted') status=r.status;
   else if(r.role==='customer'||r.role==='admin') status='approved';
   else if(r.status==='active') status='approved';
+  else if(r.status==='rejected') status='rejected';
   else status='pending';
 
   /* identity/role/status always come from real columns, never metadata */
@@ -2233,8 +2263,15 @@ function renderAdminGovernance(){
     <section id="qt-sec-audit" class="qt-admin-panel"><div class="qt-user-control-head"><div><h3>🧾 Audit Log</h3><p class="qt-admin-note">ประวัติการทำงานของผู้ดูแลระบบและเหตุการณ์สำคัญ</p></div><button class="btn-secondary" onclick="qtAdminRefreshAuditLog()">🔄 รีเฟรช Audit Log</button></div><div class="card"><div class="qt-audit-table-wrap"><table class="qt-admin-table"><thead><tr><th>ผู้ดำเนินการ</th><th>การทำงาน</th><th>ประเภทข้อมูล</th><th>ID รายการ</th><th>วันและเวลา</th></tr></thead><tbody>${audit.slice(-100).reverse().map(x=>{const actor=users.find(u=>u.id===x.actorId);return `<tr><td>${esc(actor?.name||x.actorId||'-')}<br><small>${esc(x.actorRole||'-')}</small></td><td>${esc(x.action||'-')}</td><td>${esc(x.entityType||'-')}</td><td>${esc(x.entityId||'-')}</td><td>${x.at?new Date(x.at).toLocaleString('th-TH'):'-'}</td></tr>`;}).join('')||'<tr><td colspan="5">ยังไม่มีบันทึก</td></tr>'}</tbody></table></div></div></section>
     <section id="qt-sec-settings" class="qt-admin-panel"><h3>⚙️ ตั้งค่าระบบ</h3><div class="card"><div class="qt-settings-grid"><label>ค่าจัดส่ง ≤ 5 กม. (บาท)<input id="qt-set-delivery5" type="number" min="0" step="1" value="${qtGetSystemSettings().delivery5}"></label><label>ค่าจัดส่ง ≤ 10 กม. (บาท)<input id="qt-set-delivery10" type="number" min="0" step="1" value="${qtGetSystemSettings().delivery10}"></label><label>รัศมีรับงานไรเดอร์ (กม.)<input id="qt-set-riderRadius" type="number" min="0" step="0.5" value="${qtGetSystemSettings().riderRadius}"></label><label>รัศมีรับงานช่าง (กม.)<input id="qt-set-techRadius" type="number" min="0" step="0.5" value="${qtGetSystemSettings().techRadius}"></label><label>Timeout ออเดอร์ (นาที)<input id="qt-set-orderTimeout" type="number" min="1" step="1" value="${qtGetSystemSettings().orderTimeout}"></label><label>ค่าธรรมเนียมระบบ (%)<input id="qt-set-systemFee" type="number" min="0" max="100" step="0.1" value="${qtGetSystemSettings().systemFee}"></label><label class="qt-settings-toggle">เปิดการแจ้งเตือน <input id="qt-set-notifications" type="checkbox" ${qtGetSystemSettings().notifications?'checked':''}></label></div><div class="row-btns" style="margin-top:14px"><button class="btn-primary" onclick="qtSaveSystemSettings()">💾 บันทึกการตั้งค่า</button></div><p class="qt-admin-note">ค่าจะถูกเก็บในระบบต้นแบบของเบราว์เซอร์ และควรย้ายไปฐานข้อมูล/Server พร้อมสิทธิ์ Admin เมื่อใช้งานจริง</p></div></section>
   </div>`);
-  window.qtAdminTab=function(id){document.querySelectorAll('.qt-admin-panel').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('.qt-admin-tab').forEach(x=>x.classList.toggle('active',x.dataset.target===id));try{if(id==='qt-sec-delivery'&&typeof qtRenderAdminRiderPresence==='function')qtRenderAdminRiderPresence();}catch(e){}};
-  document.querySelectorAll('.qt-admin-tab').forEach(x=>x.classList.toggle('active',x.dataset.target==='qt-sec-overview'));
+  window.qtAdminTab=function(id){
+    try{sessionStorage.setItem('qt_admin_active_tab',id);}catch(e){}
+    document.querySelectorAll('.qt-admin-panel').forEach(x=>x.classList.toggle('active',x.id===id));
+    document.querySelectorAll('.qt-admin-tab').forEach(x=>x.classList.toggle('active',x.dataset.target===id));
+    try{if(id==='qt-sec-delivery'&&typeof qtRenderAdminRiderPresence==='function')qtRenderAdminRiderPresence();}catch(e){}
+  };
+  let qtSavedAdminTab='qt-sec-overview'; try{qtSavedAdminTab=sessionStorage.getItem('qt_admin_active_tab')||qtSavedAdminTab;}catch(e){}
+  if(!document.getElementById(qtSavedAdminTab)) qtSavedAdminTab='qt-sec-overview';
+  qtAdminTab(qtSavedAdminTab);
 }
 
 /* ---------- V5.29 USER CATEGORY CONTROL ---------- */
@@ -2244,7 +2281,17 @@ window.qtUserCategory=function(type){
 };
 
 /* ---------- Router ---------- */
-function navigate(hash){ location.hash = hash; }
+function navigate(hash){
+  const target=String(hash||'home').replace(/^#/,'');
+  const current=(location.hash||'#home').replace(/^#/,'');
+  if(current===target){ router(); window.scrollTo({top:0,behavior:'smooth'}); return; }
+  location.hash = target;
+}
+function qtGoBack(){
+  if(history.length>1){ history.back(); return; }
+  const u=currentUser(); navigate(!u?'login':(u.type==='customer'?'home':(u.type==='admin'?'admin':'dashboard')));
+}
+function qtLandingPage(user){ return !user?'login':(user.type==='customer'?'home':(user.type==='admin'?'admin':'dashboard')); }
 window.addEventListener('hashchange', router);
 window.addEventListener('pageshow', ()=>{
   const saved=sessionStorage.getItem('qt_rider_register_hash');
@@ -2390,11 +2437,14 @@ function layout(title, content){
   document.title = title + ' - QueueTech';
   const user = currentUser();
   document.getElementById('app').innerHTML = `
-    <header class="qt-header">
-      <div class="qt-logo" onclick="navigate(user?(user.type==='customer'?'home':(user.type==='admin'?'admin':'dashboard')):'login')">🧭 QueueTech</div>
+    <header class="qt-header qt-appbar">
+      <div class="qt-appbar-left">
+        ${location.hash && location.hash.replace('#','')!==qtLandingPage(user) ? `<button type="button" class="qt-back-btn" onclick="qtGoBack()" aria-label="ย้อนกลับ">‹</button>` : ''}
+        <div class="qt-logo" onclick="navigate(qtLandingPage(user))">🧭 QueueTech</div>
+      </div>
       ${user
-        ? `<div style="display:flex;align-items:center;gap:6px;"><div class="qt-user-chip" onclick="navigate('dashboard')">👤 ${escapeHtml(user.name)} (${roleLabel(user.type)})</div><button type="button" class="btn-danger" style="min-height:38px;padding:7px 10px;font-size:12px;" onclick="logout();return false;">ออกจากระบบ</button></div>`
-        : `<div class="qt-auth-links"><a href="#login">เข้าสู่ระบบ</a> | <a href="#register">สมัครสมาชิก</a></div>`}
+        ? `<div class="qt-appbar-user"><div class="qt-user-chip" onclick="navigate('${user.type==='customer'?'dashboard':qtLandingPage(user)}')">👤 ${escapeHtml(user.name)}</div><button type="button" class="qt-logout-btn" onclick="logout();return false;" aria-label="ออกจากระบบ">↪</button></div>`
+        : `<div class="qt-auth-links"><a href="#login">เข้าสู่ระบบ</a><a href="#register">สมัคร</a></div>`}
     </header>
     <main class="qt-main">${content}</main>
     ${bottomNav()}
@@ -2934,11 +2984,13 @@ function renderAdminDashboard(user){
       <div class="qt-admin-workrow"><div class="qt-admin-workicon">📣</div><div class="qt-admin-workmain"><b>Promote รออนุมัติ</b><small>คำขอโฆษณาของร้านค้า</small></div><strong class="qt-admin-workcount">${pendingPromos}</strong><button class="qt-admin-workbtn" onclick="navigate('admin-governance');setTimeout(()=>qtAdminTab('qt-sec-promote'),0)">ดู</button></div>
       <div class="qt-admin-workrow"><div class="qt-admin-workicon">📦</div><div class="qt-admin-workmain"><b>ออเดอร์กำลังดำเนินการ</b><small>งานที่ยังไม่เสร็จหรือยกเลิก</small></div><strong class="qt-admin-workcount">${activeOrders}</strong><button class="qt-admin-workbtn" onclick="navigate('admin-orders')">ดูงาน</button></div>
     </div>
-    <button class="btn-secondary btn-block" onclick="qtAdminRefresh('dashboard')">🔄 รีเฟรชข้อมูล</button>
-    <button class="btn-primary btn-block" onclick="navigate('admin-governance')">🛡️ ศูนย์ควบคุมแอดมิน</button>
-    <button class="btn-primary btn-block" onclick="navigate('admin-orders')">📦 จัดการออเดอร์</button>
-    <button class="btn-primary btn-block" onclick="navigate('admin-gp')">💰 สรุปยอด GP ร้านค้า</button>
-    <button class="btn-danger btn-block" onclick="logout()">ออกจากระบบ Admin</button>
+    <div class="qt-admin-home-actions">
+      <button onclick="navigate('admin-governance')"><span>ศูนย์ควบคุม</span><small>ผู้ใช้ • อนุมัติ • ตั้งค่า</small></button>
+      <button onclick="navigate('admin-orders')"><span>จัดการออเดอร์</span><small>ติดตามและจัดการรายการ</small></button>
+      <button onclick="navigate('admin-gp')"><span>สรุปยอด GP</span><small>รายได้และยอดร้านค้า</small></button>
+      <button onclick="qtAdminRefresh('dashboard')"><span>รีเฟรชข้อมูล</span><small>อัปเดตข้อมูลล่าสุด</small></button>
+    </div>
+    <button class="qt-admin-logout" onclick="logout()">ออกจากระบบ Admin</button>
   </div>`);
 }
 function adminUserCard(u, approved=false, suspended=false){
@@ -2962,6 +3014,17 @@ function adminUserCard(u, approved=false, suspended=false){
     </div>
   </div>`;
 }
+function qtAdminStayAfterMutation(preferredTab='qt-sec-approval'){
+  const page=(location.hash||'#admin').replace('#','').split('/')[0];
+  if(page==='admin-governance'){
+    try{sessionStorage.setItem('qt_admin_active_tab',preferredTab);}catch(e){}
+    renderAdminGovernance();
+    return;
+  }
+  if(page==='admin-orders'){ renderAdminOrderCenter(currentUser()); return; }
+  if(page==='admin-gp'){ renderAdminGpSettlement(); return; }
+  renderAdminDashboard(currentUser());
+}
 function adminApproveUser(id){
   const admin=currentUser(); if(!admin||admin.type!=='admin'){toast('ไม่มีสิทธิ์');return;}
   let users=dbGet('qt_users',[]); const u=users.find(x=>x.id===id); if(!u){toast('ไม่พบผู้ใช้');return;}
@@ -2969,7 +3032,7 @@ function adminApproveUser(id){
   if(u.type==='rider'){ u.applicationStatus='approved'; u.available=false; u.online=false; }
   dbSet('qt_users',users); qtAudit('user_approve',{userId:id,role:u.type});
   pushNotification(u.id,'✅ บัญชีได้รับการอนุมัติ','คุณสามารถเริ่มใช้งาน QueueTech ได้แล้ว','dashboard');
-  toast('อนุมัติบัญชีแล้ว'); renderAdminDashboard(admin);
+  toast('อนุมัติบัญชีแล้ว'); qtAdminStayAfterMutation('qt-sec-approval');
 }
 function adminRejectUser(id){
   const admin=currentUser(); if(!admin||admin.type!=='admin'){toast('ไม่มีสิทธิ์');return;}
@@ -2978,7 +3041,7 @@ function adminRejectUser(id){
   if(u.type==='rider'){ u.applicationStatus='rejected'; u.available=false; u.online=false; }
   dbSet('qt_users',users); qtAudit('user_reject',{userId:id,role:u.type});
   pushNotification(u.id,'❌ ไม่อนุมัติบัญชี','บัญชีของคุณยังไม่ผ่านการอนุมัติ กรุณาติดต่อ QueueTech','approval-pending');
-  toast('เปลี่ยนสถานะเป็นไม่อนุมัติแล้ว'); renderAdminDashboard(admin);
+  toast('เปลี่ยนสถานะเป็นไม่อนุมัติแล้ว'); qtAdminStayAfterMutation('qt-sec-approval');
 }
 function adminSuspendUser(id){
   const admin=currentUser(); if(!admin||admin.type!=='admin'){toast('ไม่มีสิทธิ์');return;}
