@@ -6,7 +6,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>QueueTech V5.42</title>
+<title>QueueTech V5.43</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
@@ -2197,20 +2197,18 @@ async function adminDeleteUser(id){
   try{await qtDeleteUserFromDatabase(u);QT_DB_CACHE.qt_users=users.filter(x=>x.id!==id);qtAudit('user_delete',{userId:id,role:u.type,name:u.name});toast('ลบผู้ใช้งานออกจากฐานข้อมูลแล้ว');renderAdminGovernance();}catch(e){console.error(e);toast('ลบไม่สำเร็จ: '+e.message);}
 }
 async function adminDeleteOrder(orderId){
-  const admin=qtAdminOnly(); if(!admin)return; const orders=dbGet('qt_orders',[]); const o=orders.find(x=>x.id===orderId); if(!o){toast('ไม่พบออเดอร์');return;}
-  const deletable=['cancelled','completed','shop_accepted'];
-  if(!deletable.includes(o.status)){toast('ลบได้เฉพาะออเดอร์ที่ยกเลิก ส่งสำเร็จ หรือร้านรับออเดอร์แล้ว');return;}
-  const activeWarn=o.status==='shop_accepted'?'\n\n⚠️ ออเดอร์นี้ร้านรับแล้วและยังไม่จบ การลบจะหายถาวรและแจ้งลูกค้า/ร้านค้า':'';
-  if(!confirm(`ยืนยันลบออเดอร์ ${displayOrderNumber(o)} หรือไม่?${activeWarn}`))return;
+  const admin=qtAdminOnly(); if(!admin)return;
+  const orders=dbGet('qt_orders',[]); const o=orders.find(x=>x.id===orderId);
+  if(!o){toast('ไม่พบออเดอร์');return;}
+  if(!confirm(`ยืนยันลบออเดอร์ ${displayOrderNumber(o)} หรือไม่?\n\nAdmin สามารถลบได้ทุกสถานะ การลบนี้ถาวร`))return;
   try{
     await qtDeleteOrderFromDatabase(orderId);
-    if(o.status==='shop_accepted'){
-      [o.customerId,o.shopId].filter(Boolean).forEach(id=>pushNotification(id,'🗑️ ออเดอร์ถูกลบโดย Admin',`เลขออเดอร์ ${displayOrderNumber(o)} ถูกลบออกจากระบบ`,'home'));
-    }
+    [o.customerId,o.shopId,o.riderId].filter(Boolean).forEach(id=>pushNotification(id,'🗑️ ออเดอร์ถูกลบโดย Admin',`เลขออเดอร์ ${displayOrderNumber(o)} ถูกลบออกจากระบบ`,'home'));
     QT_DB_CACHE.qt_orders=orders.filter(x=>x.id!==orderId);
     delete QT_DB_CACHE[chatKey(orderId)]; delete QT_DB_CACHE[chatKey(orderId)+'_deleteAt'];
-    qtAudit('order_delete',{orderId,orderNumber:displayOrderNumber(o),status:o.status});
-    toast('ลบออเดอร์ออกจากฐานข้อมูลแล้ว'); renderAdminOrderCenter(admin);
+    qtAudit('order_delete',{orderId,orderNumber:displayOrderNumber(o),status:o.status,force:true});
+    toast('ลบออเดอร์ออกจากฐานข้อมูลแล้ว');
+    renderAdminOrderCenter(admin);
   }catch(e){console.error(e);toast('ลบออเดอร์ไม่สำเร็จ: '+e.message);}
 }
 
@@ -3979,7 +3977,7 @@ function orderActionButtons(order, user){
   if(user.type==='admin'){
     if(order.status!=='cancelled' && order.status!=='completed') btns.push(`<button class="btn-block" style="background:var(--danger);color:#fff;border:none;padding:12px;border-radius:10px;cursor:pointer;" onclick="adminCancelOrder('${order.id}')">❌ ยกเลิกออเดอร์โดย Admin</button>`);
     if(order.status==='waiting_rider' && !order.riderId) btns.push(`<button class="btn-block" style="background:#6b46c1;color:#fff;border:none;padding:12px;border-radius:10px;cursor:pointer;" onclick="adminRedispatchOrder('${order.id}')">⚙️ จ่ายงานไรเดอร์ใหม่</button>`);
-    if(['cancelled','completed','shop_accepted'].includes(order.status)) btns.push(`<button class="btn-block" style="background:#475569;color:#fff;border:none;padding:12px;border-radius:10px;cursor:pointer;" onclick="adminDeleteOrder('${order.id}')">🗑️ ลบออเดอร์</button>`);
+    btns.push(`<button class="btn-block" style="background:#475569;color:#fff;border:none;padding:12px;border-radius:10px;cursor:pointer;" onclick="adminDeleteOrder('${order.id}')">🗑️ ลบออเดอร์</button>`);
   }
   return btns.join('') || '<p>รอการดำเนินการ...</p>';
 }
@@ -4029,7 +4027,7 @@ function renderAdminOrderCenter(user){
   const cancelled=orders.filter(o=>o.status==='cancelled');
   layout('ศูนย์จัดการออเดอร์ Admin',`<h2>📦 ศูนย์จัดการออเดอร์</h2>
     <div class="stat-cards"><div class="stat-card">กำลังดำเนินการ <b>${active.length}</b></div><div class="stat-card">มีไรเดอร์รับแล้ว <b>${assigned.length}</b></div><div class="stat-card">ส่งสำเร็จ <b>${completed.length}</b></div><div class="stat-card">ยกเลิก <b>${cancelled.length}</b></div></div>
-    <div class="card" style="margin:12px 0"><b>Admin สามารถ</b><div style="margin-top:7px">🔎 ตรวจสอบรายละเอียด • 🛵 ดูไรเดอร์ผู้รับงาน • 📍 ติดตามตำแหน่งระหว่างขนส่ง • ❌ ยกเลิก • 🗑️ ลบออเดอร์ที่จบแล้ว</div></div>
+    <div class="card" style="margin:12px 0"><b>Admin สามารถ</b><div style="margin-top:7px">🔎 ตรวจสอบรายละเอียด • 🛵 ดูไรเดอร์ผู้รับงาน • 📍 ติดตามตำแหน่งระหว่างขนส่ง • ❌ ยกเลิก • 🗑️ ลบออเดอร์ได้ทุกสถานะ</div></div>
     <h3>📋 ออเดอร์ทั้งหมด</h3>${orders.length?orders.map(adminOrderRow).join(''):'<p>ยังไม่มีออเดอร์</p>'}
     <button class="btn-secondary btn-block" onclick="navigate('admin')">← กลับ Admin Dashboard</button>`);
 }
